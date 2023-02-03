@@ -5,33 +5,51 @@ Install tomcat :
 cd /opt
 wget https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.71/bin/apache-tomcat-9.0.71.tar.gz
 tar -xvzf apache-tomcat-9.0.71.tar.gz
-mv apache-tomcat-9.0.71 tomcat
+mv apache-tomcat-9.0.71 tomcat (This means that you have renamed the entire unzipped & untarred file with tomcat)
 rm -rf apache-tomcat-9.0.62.tar.gz
 cd tomcat/bin
-./shutdown.sh
 ./startup.sh
-chown -R ec2-user:ec2-user tomcat
 
+check your machine on port <public-ip>:8080 (#Copied from the AWS instance, it is the same for Tomcat and Jenkins)
+#You get a message on the internet that "If you are seeing this, you have successfully installed Tomcat"
 
-check your machine on port <public-ip>:8080
-find / -name context.xml
+#When you click the manager's app at the right and get an error message, read this error message bcs you will have to edit the "Manager's context.xml file", 
+change the file called "conf/tomcat-users.xml"by adding a rolename, username and a password.
+
+#In gitbash, exit to cd /opt location using cd .., you can see from the opt folder that the tomcat file is owned by the root user
+chown -R ec2-user:ec2-user tomcat/ (This changes the user from root to ec2-user )
+
+find / -name context.xml (#In the opt folder)
+# you will find 4 different files with the context.xml. Check all 4 files using nano as below, any file that has any restriction on IP addresses should be commented
+out. (This shows that IP addresses that do not start with a certain number as stated within the valve code should not be allowed to run) 
+# An example is typing "<!--" about 2 spaces before <Valve and "-->" about 1 space after /> ,on the same code as the Valve.
+You can also delete everything between allow=" and " and input the IP address you have for your AWS instance instead of commenting the statement out.
+
 nano /opt/tomcat/conf/context.xml
 nano /opt/tomcat/webapps/examples/META-INF/context.xml
 nano /opt/tomcat/webapps/host-manager/META-INF/context.xml
 nano /opt/tomcat/webapps/manager/META-INF/context.xml
+
 cd ..
+In the tomcat folder, use ls -l to confirm that there is a conf folder
 cd conf/
 nano tomcat-users.xml
+# Either you uncomment or comment out from role in the 1st line to role1 in the 5th line or you input the lines below between [role1"/>] and [</tomcat-users>]
 
+================================================================================================================
 <role rolename="manager-gui"/>
 <role rolename="manager-script"/>
 <role rolename="manager-jmx"/>
 <role rolename="manager-status"/>
 <user username="tomcat" password="pass123" roles="manager-gui"/>
 <user username="admin" password="admin123" roles="manager-gui, manager-script, manager-jmx, manager-status"/>
+================================================================================================================
+cd ../bin
+./shutdown.sh to shutdown
 
-./shutdown.sh
-./startup.sh ==> Tomcat should be up and running.
+./startup.sh to restart
+# You can now try logging into Tomcat on the internet using the IP address
 
-
-
+(cd /opt/tomcat/bin before using ./shutdown.sh to shutdown
+./startup.sh ==> Tomcat should be up and running.)
+This is not necessarily important
